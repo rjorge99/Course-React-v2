@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
-import { LoginPage } from '../components/auth';
-import { HeroRoutes } from '../components/heroes';
+import { LoginPage } from '../auth';
+import { HeroRoutes } from '../heroes';
 
 export const AppRouter = () => {
     return (
