@@ -6,5 +6,10 @@ export default defineConfig({
     plugins: [react()],
     server: {
         open: true
+    },
+    esbuild: {
+        define: {
+            this: 'window'
+        }
     }
 });
