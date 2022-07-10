@@ -5,6 +5,7 @@ import {
     registerUserWithEmailPassword,
     signInWithGoogle
 } from '../../firebase/providers';
+import { clearNotesLogout } from '../journal/journalSlice';
 
 export const authSlice = createSlice({
     name: 'auth',
@@ -77,6 +78,7 @@ export const startLoginWithEmailPassword = (email, password) => async (dispatch)
 
 export const startLogOut = () => async (dispatch) => {
     await logoutFirebase();
+    dispatch(clearNotesLogout());
     dispatch(logout());
 };
 

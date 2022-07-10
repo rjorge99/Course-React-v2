@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { collection, doc, setDoc } from 'firebase/firestore/lite';
+import { collection, deleteDoc, doc, setDoc } from 'firebase/firestore/lite';
+import { fileUpload } from '../../fileUpload';
 import { FirebaseDB } from '../../firebase/config';
 import { loadNotes } from '../../helpers/loadNotes';
 
@@ -21,13 +22,38 @@ export const journalSlice = createSlice({
         },
         setActiveNote: (state, action) => {
             state.active = action.payload;
+            state.messageSaved = '';
         },
         setNotes: (state, action) => {
             state.notes = action.payload;
         },
-        setSaving: (state) => {},
-        updateNote: (state, action) => {},
-        deleteNoteById: (state, action) => {}
+        setSaving: (state) => {
+            state.isSaving = true;
+            state.messageSaved = '';
+        },
+        updateNote: (state, action) => {
+            state.isSaving = false;
+            state.notes = state.notes.map((note) => {
+                if (note.id === action.payload.id) {
+                    return action.payload;
+                }
+                return note;
+            });
+            state.messageSaved = 'Note updated correctly.';
+        },
+        deleteNoteById: (state, action) => {
+            state.notes = state.notes.filter((note) => note.id !== action.payload);
+            state.active = null;
+        },
+        setPhotosToActiveNote: (state, action) => {
+            state.active.imageUrls = [...state.active.imageUrls, ...action.payload];
+        },
+        clearNotesLogout: (state) => {
+            state.notes = [];
+            state.active = null;
+            state.messageSaved = '';
+            state.isSaving = false;
+        }
     }
 });
 
@@ -56,5 +82,49 @@ export const startLoadingNotes = () => async (dispatch, getState) => {
     dispatch(setNotes(notes));
 };
 
-const { addNewEmptyNote, setActiveNote, savingNewNote, setNotes } = journalSlice.actions;
+export const startSaveNote = () => async (dispatch, getState) => {
+    dispatch(setSaving());
+
+    const { uid } = getState().auth;
+    const { active: note } = getState().journal;
+
+    const { id, ...noteToFireStore } = note;
+
+    const docRef = doc(FirebaseDB, `${uid}/journal/notes/${note.id}`);
+    await setDoc(docRef, noteToFireStore, { merge: true });
+
+    dispatch(updateNote(note));
+};
+
+export const startUploadingFiles =
+    (files = []) =>
+    async (dispatch, getState) => {
+        dispatch(setSaving());
+
+        const fileUploadPromises = [];
+        for (const file of files) fileUploadPromises.push(fileUpload(file));
+
+        const photosUrls = await Promise.all(fileUploadPromises);
+        dispatch(setPhotosToActiveNote(photosUrls));
+    };
+
+export const startDeletingNote = () => async (dispatch, getState) => {
+    const { uid } = getState().auth;
+    const { active: note } = getState().journal;
+
+    const docRef = doc(FirebaseDB, `${uid}/journal/notes/${note.id}`);
+    await deleteDoc(docRef);
+    dispatch(deleteNoteById(note.id));
+};
+
+const {
+    addNewEmptyNote,
+    deleteNoteById,
+    savingNewNote,
+    setNotes,
+    setPhotosToActiveNote,
+    setSaving,
+    updateNote
+} = journalSlice.actions;
+export const { setActiveNote, clearNotesLogout } = journalSlice.actions;
 export default journalSlice.reducer;
