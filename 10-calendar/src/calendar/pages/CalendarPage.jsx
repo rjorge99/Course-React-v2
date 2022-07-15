@@ -1,24 +1,31 @@
-import { NavBar } from '../components/NavBar';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 import { Calendar } from 'react-big-calendar';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { CalendarEvent } from '../components/CalendarEvent';
+import { CalendarModal } from '../components/CalendarModal';
+import { NavBar } from '../components/NavBar';
 import { addHours } from 'date-fns';
-import { localizer } from '../../helpers/calendarLocalizer';
 import { getMessagesES } from '../../helpers/getMessages';
+import { localizer } from '../../helpers/calendarLocalizer';
+import { useState } from 'react';
 
 const events = [
     {
         title: 'All Day Event',
         notes: 'Notas',
         start: new Date(),
-        end: addHours(new Date(), 2)
+        end: addHours(new Date(), 2),
+        user: {
+            id: 1,
+            name: 'Juan'
+        }
     }
 ];
 
 export const CalendarPage = () => {
-    const eventStyleGetter = (event, start, end, isSelected) => {
-        console.log({ event, start, end, isSelected });
+    const [lastView] = useState(localStorage.getItem('lastView') || 'week');
 
+    const eventStyleGetter = (event, start, end, isSelected) => {
         return {
             style: {
                 backgroundColor: '#347CF7',
@@ -29,10 +36,19 @@ export const CalendarPage = () => {
         };
     };
 
+    const onDoubleClick = (event) => {};
+
+    const onSelect = (event) => {};
+
+    const onViewChanged = (event) => {
+        localStorage.setItem('lastView', event);
+    };
+
     return (
         <>
             <NavBar />
             <Calendar
+                defaultView={lastView}
                 culture='es'
                 localizer={localizer}
                 events={events}
@@ -41,7 +57,14 @@ export const CalendarPage = () => {
                 style={{ height: 'calc(100vh - 80px)' }}
                 messages={getMessagesES()}
                 eventPropGetter={eventStyleGetter}
+                components={{
+                    event: CalendarEvent
+                }}
+                onDoubleClickEvent={onDoubleClick}
+                onSelectEvent={onSelect}
+                onView={onViewChanged}
             />
+            <CalendarModal />
         </>
     );
 };
