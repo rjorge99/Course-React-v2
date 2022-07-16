@@ -7,6 +7,7 @@ import es from 'date-fns/locale/es';
 import { addHours, differenceInSeconds } from 'date-fns';
 import { useMemo, useState } from 'react';
 import Swal from 'sweetalert2';
+import { useUiStore } from '../../hooks/useUiStore';
 registerLocale('es', es);
 
 const customStyles = {
@@ -23,8 +24,8 @@ const customStyles = {
 Modal.setAppElement('#root');
 
 export const CalendarModal = () => {
+    const { isDateModalOpen, closeDateModal } = useUiStore();
     const [formSubmitted, setFormSubmitted] = useState();
-    const [isOpen, setIsOpen] = useState(true);
     const [formValues, setFormValues] = useState({
         title: 'Jorge',
         notes: 'Reyes',
@@ -39,10 +40,6 @@ export const CalendarModal = () => {
 
         return 'form-control';
     }, [formValues.title, formSubmitted]);
-
-    const onCloseModal = () => {
-        setIsOpen(false);
-    };
 
     const onDateChanged = (event, changing) => {
         setFormValues({
@@ -76,8 +73,8 @@ export const CalendarModal = () => {
 
     return (
         <Modal
-            isOpen={isOpen}
-            onRequestClose={onCloseModal}
+            isOpen={isDateModalOpen}
+            onRequestClose={closeDateModal}
             style={customStyles}
             overlayClassName='modal-fondo'
             closeTimeoutMS={200}
