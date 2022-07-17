@@ -45,7 +45,15 @@ const loginUsuario = async (req, res) => {
     });
 };
 
-const revalidarToken = (req, res) => {};
+const revalidarToken = async (req, res) => {
+    const { uid, name } = req.body;
+    const token = await generarJWT(uid, name);
+
+    res.json({
+        ok: true,
+        token
+    });
+};
 
 module.exports = {
     crearUsuario,
