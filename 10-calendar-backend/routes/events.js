@@ -4,6 +4,7 @@ const { getEvents, createEvent, updateEvent, deleteEvent } = require('../control
 const isDate = require('../helpers/isDate');
 const validarCampos = require('../middlewares/validar-campos');
 const validarJWT = require('../middlewares/validar-jwt');
+const validateObjectId = require('../middlewares/validateObjectId');
 const router = Router();
 
 router.use(validarJWT);
@@ -21,8 +22,8 @@ router.post(
     createEvent
 );
 
-router.put('/:id', updateEvent);
+router.put('/:id', validateObjectId, updateEvent);
 
-router.delete('/:id', deleteEvent);
+router.delete('/:id', validateObjectId, deleteEvent);
 
 module.exports = router;
