@@ -13,6 +13,7 @@ class Server {
         this.app.use(express.json());
 
         this.app.use('/api/auth', require('../routes/auth'));
+        this.app.use('/api/events', require('../routes/events'));
         this.app.use(error);
     }
 
