@@ -38,10 +38,13 @@ const loginUsuario = async (req, res) => {
 
     if (!validPassword) return res.status(400).json({ msg: 'El password es incorrecto' });
 
+    const token = await generarJWT(usuario.id, usuario.name);
+
     res.json({
         ok: true,
         uid: usuario.id,
-        name: usuario.name
+        name: usuario.name,
+        token
     });
 };
 
