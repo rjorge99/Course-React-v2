@@ -6,21 +6,29 @@ import { CalendarModal } from '../components/CalendarModal';
 import { NavBar } from '../components/NavBar';
 import { getMessagesES } from '../../helpers/getMessages';
 import { localizer } from '../../helpers/calendarLocalizer';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useUiStore } from '../../hooks/useUiStore';
 import { useCalendarStore } from '../../hooks/useCalendarStore';
 import { FabAddNew } from '../components/FabAddNew';
 import { FabDelete } from '../components/FabDelete';
+import { useAuthStore } from '../../hooks/useAuthStore';
 
 export const CalendarPage = () => {
+    const { user } = useAuthStore();
     const [lastView] = useState(localStorage.getItem('lastView') || 'week');
     const { openDateModal } = useUiStore();
-    const { events, setActiveEvent } = useCalendarStore();
+    const { events, setActiveEvent, startLoadingEvents } = useCalendarStore();
+
+    useEffect(() => {
+        startLoadingEvents();
+    }, []);
 
     const eventStyleGetter = (event, start, end, isSelected) => {
+        const isMyEvent = user.uid === event.user._id || user.uid === event.user.uid;
+        console.log(event.user);
         return {
             style: {
-                backgroundColor: '#347CF7',
+                backgroundColor: isMyEvent ? '#347CF7' : '#465660',
                 borderRadius: '0px',
                 opacity: 0.8,
                 color: 'white'
